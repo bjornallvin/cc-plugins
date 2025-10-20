@@ -12,7 +12,6 @@ A security plugin that helps protect sensitive .env files from accidental access
 
 - **Permission Management**: Apply secure deny rules for .env and .env.local files
 - **Permission Checking**: Verify current Claude Code permissions for .env files
-- **Environment Loading**: Execute bash commands with environment variables loaded from .env
 
 #### Installation
 
@@ -61,14 +60,6 @@ ALLOW:
   - Write(**/.env.example)
 ```
 
-##### `/secure-env.with-env`
-
-Execute a bash command with environment variables loaded from .env.
-
-**Usage:** `/secure-env.with-env <command>`
-
-Example: `/secure-env.with-env echo $DATABASE_URL`
-
 #### Scripts
 
 - `scripts/check-env-permissions.sh` - Check .env permissions across all Claude settings files
@@ -83,42 +74,30 @@ Claude Code has a settings precedence system:
 
 This plugin ensures that .env protections are applied at the project level to prevent accidental exposure of sensitive credentials to Claude Code.
 
-#### Accessing .env Values Without Reading the File
+#### Using .env Values Securely
 
-Even with deny rules in place, you can still use environment variables from your `.env` file by sourcing it in your shell. This loads the variables into the environment without Claude needing to read the file directly.
+Even with deny rules in place, you can still use environment variables from your `.env` file by sourcing it when running commands. This loads the variables into the shell environment without Claude reading the file directly.
 
-**Method 1: Use the `/secure-env.with-env` command**
-
-The easiest way is to use the built-in command:
+**Safe approach: Source .env for application commands**
 
 ```bash
-/secure-env.with-env echo $DATABASE_URL
-```
-
-This command uses `source .env && <your-command>` behind the scenes, making environment variables available to the command without exposing the file contents to Claude.
-
-**Method 2: Manual sourcing in bash commands**
-
-You can also manually source the .env file when running bash commands:
-
-```bash
+source .env && npm start
 source .env && npm run migrate
 source .env && docker-compose up
 source .env && python manage.py runserver
 ```
 
 **How it works:**
-- `source .env` loads all environment variables into the current shell session
-- The variables become available to any subsequent commands in that session
-- Claude never sees the actual file contents, only the command output
-- The .env file remains protected by the deny rules
+- `source .env` loads environment variables into the current shell session
+- The variables become available to your application or scripts
+- Claude never reads the .env file contents
+- The .env file remains protected by deny rules
+- **Important**: Avoid echoing or printing env var values, as that would expose them in the context
 
-**Example workflow:**
-
-1. Apply protections: `/secure-env.apply`
-2. Source and run commands: `/secure-env.with-env npm start`
-3. Environment variables are available to your application
-4. Claude can see command output but not the .env file itself
+**What NOT to do:**
+- ❌ Don't run commands like `echo $SECRET_KEY` or `printenv` - this exposes secrets in the output
+- ❌ Don't ask Claude to help debug env var values - use `.env.example` with dummy values instead
+- ✅ Do use `source .env && <command>` to run your applications that need the variables
 
 #### Best Practices
 
@@ -126,7 +105,8 @@ source .env && python manage.py runserver
 2. Run `/secure-env.apply` in each project to add protections
 3. Use `.env.example` files for documentation (Claude can read these)
 4. Keep actual credentials in `.env` or `.env.local` (Claude cannot read these after applying rules)
-5. Use `/secure-env.with-env` or `source .env && <command>` to access environment variables when needed
+5. Use `source .env && <command>` to run applications that need environment variables
+6. Never echo or print env var values in commands - this exposes them to Claude's context
 
 ## Contributing
 

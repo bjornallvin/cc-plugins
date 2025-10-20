@@ -7,7 +7,6 @@
   },
   "commands": [
     "./commands/secure-env.check.md",
-    "./commands/secure-env.apply.md",
-    "./commands/secure-env.with-env.md"
+    "./commands/secure-env.apply.md"
   ]
 }
