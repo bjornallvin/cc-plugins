@@ -1,0 +1,15 @@
+{
+  "name": "secure-env",
+  "version": "0.1.0",
+  "description": "Security hook and commands for Claude Code permissions checking",
+  "author": "",
+  "commands": [
+    "secure-env.with-env",
+    "secure-env.check",
+    "secure-env.apply"
+  ],
+  "scripts": {
+    "check-env-permissions": "scripts/check-env-permissions.sh",
+    "apply-env-security": "scripts/apply-env-security.sh"
+  }
+}
