@@ -19,7 +19,8 @@ A security plugin that helps protect sensitive .env files from accidental access
 Copy the `secure-env` directory to your Claude Code plugins location:
 
 ```bash
-cp -r secure-env ~/.claude/
+/plugin marketplace add bjornallvin/cc-plugins
+/plugin install secure-env@cc-plugins
 ```
 
 #### Commands
