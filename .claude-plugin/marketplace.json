@@ -1,0 +1,14 @@
+{
+  "name": "cc-plugins",
+  "description": "A collection of Claude Code plugins and utilities",
+  "author": "bjornallvin",
+  "repository": "https://github.com/bjornallvin/cc-plugins",
+  "plugins": [
+    {
+      "name": "secure-env",
+      "path": "secure-env",
+      "description": "Security plugin that helps protect sensitive .env files from accidental access by Claude Code while still allowing access to .env.example files",
+      "tags": ["security", "environment", "permissions"]
+    }
+  ]
+}
