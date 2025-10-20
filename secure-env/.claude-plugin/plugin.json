@@ -1,9 +1,8 @@
 {
   "name": "secure-env",
   "version": "1.0.0",
-  "description": "Security hook and commands for Claude Code permissions checking",
+  "description": "Security plugin that helps protect sensitive .env files from accidental access by Claude Code",
   "author": {
-    "name":"Björn Allvin"
-    }
-  
+    "name": "Björn Allvin"
+  }
 }
