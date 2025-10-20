@@ -83,12 +83,50 @@ Claude Code has a settings precedence system:
 
 This plugin ensures that .env protections are applied at the project level to prevent accidental exposure of sensitive credentials to Claude Code.
 
+#### Accessing .env Values Without Reading the File
+
+Even with deny rules in place, you can still use environment variables from your `.env` file by sourcing it in your shell. This loads the variables into the environment without Claude needing to read the file directly.
+
+**Method 1: Use the `/secure-env.with-env` command**
+
+The easiest way is to use the built-in command:
+
+```bash
+/secure-env.with-env echo $DATABASE_URL
+```
+
+This command uses `source .env && <your-command>` behind the scenes, making environment variables available to the command without exposing the file contents to Claude.
+
+**Method 2: Manual sourcing in bash commands**
+
+You can also manually source the .env file when running bash commands:
+
+```bash
+source .env && npm run migrate
+source .env && docker-compose up
+source .env && python manage.py runserver
+```
+
+**How it works:**
+- `source .env` loads all environment variables into the current shell session
+- The variables become available to any subsequent commands in that session
+- Claude never sees the actual file contents, only the command output
+- The .env file remains protected by the deny rules
+
+**Example workflow:**
+
+1. Apply protections: `/secure-env.apply`
+2. Source and run commands: `/secure-env.with-env npm start`
+3. Environment variables are available to your application
+4. Claude can see command output but not the .env file itself
+
 #### Best Practices
 
 1. Run `/secure-env.check` to see current permissions
 2. Run `/secure-env.apply` in each project to add protections
 3. Use `.env.example` files for documentation (Claude can read these)
 4. Keep actual credentials in `.env` or `.env.local` (Claude cannot read these after applying rules)
+5. Use `/secure-env.with-env` or `source .env && <command>` to access environment variables when needed
 
 ## Contributing
 
