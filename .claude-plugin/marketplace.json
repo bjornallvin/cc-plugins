@@ -15,6 +15,11 @@
       "name": "secure-env",
       "source": "./secure-env",
       "description": "Security plugin that helps protect sensitive .env files from accidental access by Claude Code while still allowing access to .env.example files"
+    },
+    {
+      "name": "dad",
+      "source": "./dad",
+      "description": "A plugin that delivers hilarious dad jokes on demand"
     }
   ]
 }

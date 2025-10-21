@@ -4,6 +4,17 @@ A collection of plugins and utilities for [Claude Code](https://claude.com/claud
 
 ## Plugins
 
+### dad
+
+A plugin that delivers hilarious dad jokes on demand, powered by the icanhazdadjoke API.
+
+**Key Features:**
+- Get fresh dad jokes with a simple command
+- Powered by a quality dad joke API
+- Perfect for lightening the mood during coding sessions
+
+[Read more →](./dad/README.md)
+
 ### merge-settings
 
 A plugin for managing and merging Claude Code settings across user, project, and local configuration files.

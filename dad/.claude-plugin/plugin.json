@@ -1,0 +1,11 @@
+{
+  "name": "dad",
+  "version": "1.0.0",
+  "description": "A plugin that delivers hilarious dad jokes on demand",
+  "author": {
+    "name": "Björn Allvin"
+  },
+  "commands": [
+    "./commands/joke.md"
+  ]
+}
