@@ -4,6 +4,18 @@ A collection of plugins and utilities for [Claude Code](https://claude.com/claud
 
 ## Plugins
 
+### merge-settings
+
+A plugin for managing and merging Claude Code settings across user, project, and local configuration files.
+
+**Key Features:**
+- View all settings files and see which one is active
+- Merge settings from overridden files into the active configuration
+- Handle conflicts gracefully with clear reporting
+- Create automatic backups before making changes
+
+[Read more →](./merge-settings/README.md)
+
 ### secure-env
 
 A security plugin that helps protect sensitive .env files from accidental access by Claude Code while still allowing access to .env.example files.

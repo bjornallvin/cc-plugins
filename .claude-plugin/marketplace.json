@@ -7,10 +7,14 @@
         },
   "plugins": [
     {
+      "name": "merge-settings",
+      "source": "./merge-settings",
+      "description": "Plugin for managing and merging Claude settings files across user, project, and local scopes with merge capabilities"
+    },
+    {
       "name": "secure-env",
       "source": "./secure-env",
       "description": "Security plugin that helps protect sensitive .env files from accidental access by Claude Code while still allowing access to .env.example files"
-      
     }
   ]
 }

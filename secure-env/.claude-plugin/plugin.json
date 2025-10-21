@@ -6,7 +6,7 @@
     "name": "Björn Allvin"
   },
   "commands": [
-    "./commands/secure-env.check.md",
-    "./commands/secure-env.apply.md"
+    "./commands/check.md",
+    "./commands/apply.md"
   ]
 }

@@ -1,0 +1,12 @@
+{
+  "name": "merge-settings",
+  "version": "1.0.0",
+  "description": "Plugin for managing Claude settings files across user, project, and local scopes with merge capabilities",
+  "author": {
+    "name": "Björn Allvin"
+  },
+  "commands": [
+    "./commands/check.md",
+    "./commands/merge.md"
+  ]
+}
