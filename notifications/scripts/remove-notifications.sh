@@ -90,9 +90,9 @@ if ! command -v jq &> /dev/null; then
     echo "     - hooks.Stop"
     echo ""
 else
-    # Check if hooks exist in the file
-    HAS_NOTIFICATION=$(jq -r '.hooks.Notification // empty' "$SETTINGS_FILE" 2>/dev/null)
-    HAS_STOP=$(jq -r '.hooks.Stop // empty' "$SETTINGS_FILE" 2>/dev/null)
+    # Check if hooks exist in the file (checking if arrays exist)
+    HAS_NOTIFICATION=$(jq -r '.hooks.Notification | if . then "yes" else empty end' "$SETTINGS_FILE" 2>/dev/null)
+    HAS_STOP=$(jq -r '.hooks.Stop | if . then "yes" else empty end' "$SETTINGS_FILE" 2>/dev/null)
 
     if [ -z "$HAS_NOTIFICATION" ] && [ -z "$HAS_STOP" ]; then
         echo "   ℹ️  No notification hooks found in $SETTINGS_FILE"

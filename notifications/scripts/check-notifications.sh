@@ -31,38 +31,40 @@ check_settings_file() {
         return 1
     fi
 
-    # Check for notification hooks
-    local NOTIFICATION_HOOK=$(jq -r '.hooks.Notification // empty' "$SETTINGS_FILE" 2>/dev/null)
-    local STOP_HOOK=$(jq -r '.hooks.Stop // empty' "$SETTINGS_FILE" 2>/dev/null)
+    # Check for notification hooks (new array structure)
+    local NOTIFICATION_EXISTS=$(jq -r '.hooks.Notification | if . then "yes" else empty end' "$SETTINGS_FILE" 2>/dev/null)
+    local STOP_EXISTS=$(jq -r '.hooks.Stop | if . then "yes" else empty end' "$SETTINGS_FILE" 2>/dev/null)
 
-    if [ -z "$NOTIFICATION_HOOK" ] && [ -z "$STOP_HOOK" ]; then
+    if [ -z "$NOTIFICATION_EXISTS" ] && [ -z "$STOP_EXISTS" ]; then
         echo "   ❌ No notification hooks configured"
         echo ""
         return 1
     fi
 
     # Show configured hooks
-    if [ -n "$NOTIFICATION_HOOK" ]; then
+    if [ -n "$NOTIFICATION_EXISTS" ]; then
+        local NOTIFICATION_COMMAND=$(jq -r '.hooks.Notification[0].hooks[0].command // empty' "$SETTINGS_FILE" 2>/dev/null)
         echo "   ✅ Notification hook configured"
         echo "      Event: Notification (waiting for input)"
-        echo "      Command: $NOTIFICATION_HOOK"
+        echo "      Command: $NOTIFICATION_COMMAND"
     else
         echo "   ❌ Notification hook not configured"
     fi
 
     echo ""
 
-    if [ -n "$STOP_HOOK" ]; then
+    if [ -n "$STOP_EXISTS" ]; then
+        local STOP_COMMAND=$(jq -r '.hooks.Stop[0].hooks[0].command // empty' "$SETTINGS_FILE" 2>/dev/null)
         echo "   ✅ Stop hook configured"
         echo "      Event: Stop (task completed)"
-        echo "      Command: $STOP_HOOK"
+        echo "      Command: $STOP_COMMAND"
     else
         echo "   ❌ Stop hook not configured"
     fi
 
     echo ""
 
-    if [ -n "$NOTIFICATION_HOOK" ] && [ -n "$STOP_HOOK" ]; then
+    if [ -n "$NOTIFICATION_EXISTS" ] && [ -n "$STOP_EXISTS" ]; then
         echo "   Status: ✅ All notification hooks configured"
     else
         echo "   Status: ⚠️  Partial configuration"

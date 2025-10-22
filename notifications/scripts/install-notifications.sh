@@ -120,8 +120,28 @@ else
     if [ ! -f "$SETTINGS_FILE" ] && [ ! -L "$SETTINGS_FILE" ]; then
         # Create new settings file with just hooks
         echo '{}' | jq --arg waiting "$WAITING_HOOK" --arg completed "$COMPLETED_HOOK" '.hooks = {
-          "Notification": ("bash " + $waiting),
-          "Stop": ("bash " + $completed)
+          "Notification": [
+            {
+              "matcher": "",
+              "hooks": [
+                {
+                  "type": "command",
+                  "command": ("bash " + $waiting)
+                }
+              ]
+            }
+          ],
+          "Stop": [
+            {
+              "matcher": "",
+              "hooks": [
+                {
+                  "type": "command",
+                  "command": ("bash " + $completed)
+                }
+              ]
+            }
+          ]
         }' > "$SETTINGS_FILE"
         echo "   ✓ Created $SETTINGS_FILE with hooks"
     else
@@ -133,8 +153,28 @@ else
         # Update existing settings file - merge hooks property
         # Using cat instead of mv to preserve symlinks
         jq --arg waiting "$WAITING_HOOK" --arg completed "$COMPLETED_HOOK" '
-          .hooks.Notification = ("bash " + $waiting) |
-          .hooks.Stop = ("bash " + $completed)
+          .hooks.Notification = [
+            {
+              "matcher": "",
+              "hooks": [
+                {
+                  "type": "command",
+                  "command": ("bash " + $waiting)
+                }
+              ]
+            }
+          ] |
+          .hooks.Stop = [
+            {
+              "matcher": "",
+              "hooks": [
+                {
+                  "type": "command",
+                  "command": ("bash " + $completed)
+                }
+              ]
+            }
+          ]
         ' "$SETTINGS_FILE" > "$TEMP_FILE"
 
         cat "$TEMP_FILE" > "$SETTINGS_FILE"
