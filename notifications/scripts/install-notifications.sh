@@ -117,7 +117,7 @@ else
     # Use jq to update settings - only modify hooks property
     TEMP_FILE=$(mktemp)
 
-    if [ ! -f "$SETTINGS_FILE" ]; then
+    if [ ! -f "$SETTINGS_FILE" ] && [ ! -L "$SETTINGS_FILE" ]; then
         # Create new settings file with just hooks
         echo '{}' | jq --arg waiting "$WAITING_HOOK" --arg completed "$COMPLETED_HOOK" '.hooks = {
           "Notification": ("bash " + $waiting),
@@ -125,13 +125,20 @@ else
         }' > "$SETTINGS_FILE"
         echo "   ✓ Created $SETTINGS_FILE with hooks"
     else
+        # Check if it's a symlink
+        if [ -L "$SETTINGS_FILE" ]; then
+            echo "   ℹ️  Detected symlink, preserving it"
+        fi
+
         # Update existing settings file - merge hooks property
+        # Using cat instead of mv to preserve symlinks
         jq --arg waiting "$WAITING_HOOK" --arg completed "$COMPLETED_HOOK" '
           .hooks.Notification = ("bash " + $waiting) |
           .hooks.Stop = ("bash " + $completed)
         ' "$SETTINGS_FILE" > "$TEMP_FILE"
 
-        mv "$TEMP_FILE" "$SETTINGS_FILE"
+        cat "$TEMP_FILE" > "$SETTINGS_FILE"
+        rm "$TEMP_FILE"
         echo "   ✓ Updated hooks in $SETTINGS_FILE"
         echo "   ℹ️  All other settings preserved"
     fi

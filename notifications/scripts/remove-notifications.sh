@@ -97,11 +97,18 @@ else
     if [ -z "$HAS_NOTIFICATION" ] && [ -z "$HAS_STOP" ]; then
         echo "   ℹ️  No notification hooks found in $SETTINGS_FILE"
     else
+        # Check if it's a symlink
+        if [ -L "$SETTINGS_FILE" ]; then
+            echo "   ℹ️  Detected symlink, preserving it"
+        fi
+
         # Use jq to remove only notification hook entries
+        # Using cat instead of mv to preserve symlinks
         TEMP_FILE=$(mktemp)
         jq 'del(.hooks.Notification) | del(.hooks.Stop)' \
             "$SETTINGS_FILE" > "$TEMP_FILE"
-        mv "$TEMP_FILE" "$SETTINGS_FILE"
+        cat "$TEMP_FILE" > "$SETTINGS_FILE"
+        rm "$TEMP_FILE"
         echo "   ✓ Removed notification hooks from $SETTINGS_FILE"
         echo "   ℹ️  All other settings preserved"
     fi
