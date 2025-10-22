@@ -9,102 +9,105 @@ echo "   Time: $(date '+%Y-%m-%d %H:%M:%S')"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
-# Function to check hooks at a specific location
-check_hooks_at_location() {
-    local LEVEL="$1"
-    local CLAUDE_DIR="$2"
-    local HOOKS_DIR="$CLAUDE_DIR/hooks"
-    local SETTINGS_FILE="$CLAUDE_DIR/settings.json"
+# Function to check hooks in a specific settings file
+check_settings_file() {
+    local SETTINGS_FILE="$1"
+    local LABEL="$2"
 
-    echo "═══════════════════════════════════════════════════════════════════"
-    echo "📂 $LEVEL Level: $CLAUDE_DIR"
-    echo "═══════════════════════════════════════════════════════════════════"
-    echo ""
+    echo "───────────────────────────────────────────────────────────────────"
+    echo "📄 $LABEL"
+    echo "   File: $SETTINGS_FILE"
+    echo "───────────────────────────────────────────────────────────────────"
 
-    # Check if .claude directory exists
-    if [ ! -d "$CLAUDE_DIR" ]; then
-        echo "❌ No .claude directory found"
+    if [ ! -f "$SETTINGS_FILE" ]; then
+        echo "   ❌ File not found"
         echo ""
-        return 0
+        return 1
     fi
 
-    # Check if hooks directory exists
-    if [ ! -d "$HOOKS_DIR" ]; then
-        echo "❌ No hooks directory found"
+    if ! command -v jq &> /dev/null; then
+        echo "   ⚠️  jq not available - cannot parse settings"
         echo ""
-        return 0
+        return 1
     fi
 
-    echo "📁 Hooks directory: $HOOKS_DIR"
-    echo ""
+    # Check for notification hooks
+    local NOTIFICATION_HOOK=$(jq -r '.hooks.Notification // empty' "$SETTINGS_FILE" 2>/dev/null)
+    local STOP_HOOK=$(jq -r '.hooks.Stop // empty' "$SETTINGS_FILE" 2>/dev/null)
 
-    # Check for specific notification hooks
-    WAITING_HOOK="$HOOKS_DIR/waiting-for-input.sh"
-    COMPLETED_HOOK="$HOOKS_DIR/task-completed.sh"
-
-    local INSTALLED_COUNT=0
-
-    if [ -f "$WAITING_HOOK" ]; then
-        echo "✅ Waiting-for-input hook installed"
-        echo "   File: $WAITING_HOOK"
-        INSTALLED_COUNT=$((INSTALLED_COUNT + 1))
-    else
-        echo "❌ Waiting-for-input hook not found"
+    if [ -z "$NOTIFICATION_HOOK" ] && [ -z "$STOP_HOOK" ]; then
+        echo "   ❌ No notification hooks configured"
+        echo ""
+        return 1
     fi
 
-    echo ""
-
-    if [ -f "$COMPLETED_HOOK" ]; then
-        echo "✅ Task-completed hook installed"
-        echo "   File: $COMPLETED_HOOK"
-        INSTALLED_COUNT=$((INSTALLED_COUNT + 1))
+    # Show configured hooks
+    if [ -n "$NOTIFICATION_HOOK" ]; then
+        echo "   ✅ Notification hook configured"
+        echo "      Event: Notification (waiting for input)"
+        echo "      Command: $NOTIFICATION_HOOK"
     else
-        echo "❌ Task-completed hook not found"
+        echo "   ❌ Notification hook not configured"
     fi
 
     echo ""
 
-    # Check settings.json for hook configuration
-    if [ -f "$SETTINGS_FILE" ]; then
-        echo "📝 Settings file: $SETTINGS_FILE"
-
-        if command -v jq &> /dev/null; then
-            HOOKS_CONFIG=$(jq -r '.hooks // empty' "$SETTINGS_FILE" 2>/dev/null)
-            if [ -n "$HOOKS_CONFIG" ] && [ "$HOOKS_CONFIG" != "null" ]; then
-                echo "   Hooks configured:"
-                jq -r '.hooks | to_entries[] | "   - \(.key): \(.value)"' "$SETTINGS_FILE" 2>/dev/null
-            else
-                echo "   No hooks configured in settings.json"
-            fi
-        else
-            echo "   (jq not available - cannot parse settings)"
-        fi
+    if [ -n "$STOP_HOOK" ]; then
+        echo "   ✅ Stop hook configured"
+        echo "      Event: Stop (task completed)"
+        echo "      Command: $STOP_HOOK"
     else
-        echo "⚠️  No settings file found"
+        echo "   ❌ Stop hook not configured"
     fi
 
     echo ""
 
-    # Summary for this location
-    if [ $INSTALLED_COUNT -eq 0 ]; then
-        echo "Status: ❌ No hooks installed at $LEVEL level"
-    elif [ $INSTALLED_COUNT -lt 2 ]; then
-        echo "Status: ⚠️  Partial installation ($INSTALLED_COUNT of 2 hooks)"
+    if [ -n "$NOTIFICATION_HOOK" ] && [ -n "$STOP_HOOK" ]; then
+        echo "   Status: ✅ All notification hooks configured"
     else
-        echo "Status: ✅ All hooks installed at $LEVEL level"
+        echo "   Status: ⚠️  Partial configuration"
     fi
 
+    echo ""
+    return 0
+}
+
+# Check project level settings
+echo "═══════════════════════════════════════════════════════════════════"
+echo "📂 PROJECT Level (./.claude/)"
+echo "═══════════════════════════════════════════════════════════════════"
+echo ""
+
+PROJECT_HAS_HOOKS=false
+
+# Check settings.json
+if check_settings_file "./.claude/settings.json" "settings.json (committed to git)"; then
+    PROJECT_HAS_HOOKS=true
+fi
+
+# Check settings.local.json
+if check_settings_file "./.claude/settings.local.json" "settings.local.json (local only)"; then
+    PROJECT_HAS_HOOKS=true
+fi
+
+if [ "$PROJECT_HAS_HOOKS" = false ]; then
+    echo "   Overall: ❌ No notification hooks at project level"
+    echo ""
+fi
+
+# Check user level settings
+echo "═══════════════════════════════════════════════════════════════════"
+echo "📂 USER Level (~/.claude/)"
+echo "═══════════════════════════════════════════════════════════════════"
+echo ""
+
+check_settings_file "$HOME/.claude/settings.json" "settings.json (user-level)" || {
+    echo "   Overall: ❌ No notification hooks at user level"
     echo ""
 }
 
-# Check project level
-check_hooks_at_location "PROJECT" "./.claude"
-
-# Check user level
-check_hooks_at_location "USER" "$HOME/.claude"
-
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "💡 TIP: Run '/notifications.install' to install or update hooks"
-echo "💡 TIP: Run '/notifications.remove' to uninstall hooks"
+echo "💡 TIP: Run '/notifications.install' to install hooks"
+echo "💡 TIP: Run '/notifications.remove' to remove hooks"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""

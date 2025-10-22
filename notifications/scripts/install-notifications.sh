@@ -23,8 +23,6 @@ PLUGIN_HOOKS="$PLUGIN_ROOT/hooks"
 case "$INSTALL_LEVEL" in
     project)
         TARGET_CLAUDE="./.claude"
-        TARGET_HOOKS="$TARGET_CLAUDE/hooks"
-        HOOK_PATH_PREFIX="./.claude/hooks"
 
         # Determine which settings file to use
         case "$SETTINGS_TYPE" in
@@ -50,9 +48,7 @@ case "$INSTALL_LEVEL" in
         ;;
     user)
         TARGET_CLAUDE="$HOME/.claude"
-        TARGET_HOOKS="$TARGET_CLAUDE/hooks"
         SETTINGS_FILE="$TARGET_CLAUDE/settings.json"
-        HOOK_PATH_PREFIX="$HOME/.claude/hooks"
         echo "Installing at user level: $TARGET_CLAUDE"
         ;;
     *)
@@ -76,43 +72,29 @@ if [ ! -d "$TARGET_CLAUDE" ]; then
     echo "📁 Creating .claude directory..."
     mkdir -p "$TARGET_CLAUDE"
     echo "   ✓ Created: $TARGET_CLAUDE"
+    echo ""
 fi
 
-# Create hooks directory if it doesn't exist
-if [ ! -d "$TARGET_HOOKS" ]; then
-    echo "📁 Creating hooks directory..."
-    mkdir -p "$TARGET_HOOKS"
-    echo "   ✓ Created: $TARGET_HOOKS"
+# Verify plugin hooks exist
+WAITING_HOOK="$PLUGIN_HOOKS/waiting-for-input.sh"
+COMPLETED_HOOK="$PLUGIN_HOOKS/task-completed.sh"
+
+if [ ! -f "$WAITING_HOOK" ] || [ ! -f "$COMPLETED_HOOK" ]; then
+    echo "❌ Plugin hooks not found in: $PLUGIN_HOOKS"
+    echo ""
+    echo "Expected files:"
+    echo "  - $WAITING_HOOK"
+    echo "  - $COMPLETED_HOOK"
+    echo ""
+    echo "Please ensure the plugin is properly installed."
+    exit 1
 fi
 
+echo "✓ Plugin hooks verified in: $PLUGIN_HOOKS"
 echo ""
 
-# Copy hook scripts
-echo "📋 Copying hook scripts..."
-
-WAITING_HOOK="waiting-for-input.sh"
-COMPLETED_HOOK="task-completed.sh"
-
-if [ -f "$PLUGIN_HOOKS/$WAITING_HOOK" ]; then
-    cp "$PLUGIN_HOOKS/$WAITING_HOOK" "$TARGET_HOOKS/"
-    chmod +x "$TARGET_HOOKS/$WAITING_HOOK"
-    echo "   ✓ Copied: $WAITING_HOOK"
-else
-    echo "   ⚠️  Source not found: $PLUGIN_HOOKS/$WAITING_HOOK"
-fi
-
-if [ -f "$PLUGIN_HOOKS/$COMPLETED_HOOK" ]; then
-    cp "$PLUGIN_HOOKS/$COMPLETED_HOOK" "$TARGET_HOOKS/"
-    chmod +x "$TARGET_HOOKS/$COMPLETED_HOOK"
-    echo "   ✓ Copied: $COMPLETED_HOOK"
-else
-    echo "   ⚠️  Source not found: $PLUGIN_HOOKS/$COMPLETED_HOOK"
-fi
-
-echo ""
-
-# Update settings.json to configure hooks
-echo "⚙️  Configuring hooks in settings.json..."
+# Update settings file to configure hooks
+echo "⚙️  Configuring hooks in settings file..."
 
 # Create backup if settings file exists
 if [ -f "$SETTINGS_FILE" ]; then
@@ -127,8 +109,8 @@ if ! command -v jq &> /dev/null; then
     echo "   Please manually add these hooks to $SETTINGS_FILE:"
     echo ""
     echo '   "hooks": {'
-    echo "     \"Notification\": \"bash $HOOK_PATH_PREFIX/waiting-for-input.sh\","
-    echo "     \"Stop\": \"bash $HOOK_PATH_PREFIX/task-completed.sh\""
+    echo "     \"Notification\": \"bash $WAITING_HOOK\","
+    echo "     \"Stop\": \"bash $COMPLETED_HOOK\""
     echo '   }'
     echo ""
 else
@@ -137,16 +119,16 @@ else
 
     if [ ! -f "$SETTINGS_FILE" ]; then
         # Create new settings file with just hooks
-        echo '{}' | jq --arg prefix "$HOOK_PATH_PREFIX" '.hooks = {
-          "Notification": ("bash " + $prefix + "/waiting-for-input.sh"),
-          "Stop": ("bash " + $prefix + "/task-completed.sh")
+        echo '{}' | jq --arg waiting "$WAITING_HOOK" --arg completed "$COMPLETED_HOOK" '.hooks = {
+          "Notification": ("bash " + $waiting),
+          "Stop": ("bash " + $completed)
         }' > "$SETTINGS_FILE"
         echo "   ✓ Created $SETTINGS_FILE with hooks"
     else
         # Update existing settings file - merge hooks property
-        jq --arg prefix "$HOOK_PATH_PREFIX" '
-          .hooks.Notification = ("bash " + $prefix + "/waiting-for-input.sh") |
-          .hooks.Stop = ("bash " + $prefix + "/task-completed.sh")
+        jq --arg waiting "$WAITING_HOOK" --arg completed "$COMPLETED_HOOK" '
+          .hooks.Notification = ("bash " + $waiting) |
+          .hooks.Stop = ("bash " + $completed)
         ' "$SETTINGS_FILE" > "$TEMP_FILE"
 
         mv "$TEMP_FILE" "$SETTINGS_FILE"
@@ -159,11 +141,9 @@ echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "✅ Notification hooks installed successfully at $INSTALL_LEVEL level!"
 echo ""
-echo "Installed hooks:"
-echo "  • Waiting for input: $TARGET_HOOKS/$WAITING_HOOK"
-echo "  • Task completed: $TARGET_HOOKS/$COMPLETED_HOOK"
-echo ""
-echo "Settings configured in: $SETTINGS_FILE"
+echo "Hooks configured in: $SETTINGS_FILE"
+echo "  • Notification → $WAITING_HOOK"
+echo "  • Stop → $COMPLETED_HOOK"
 echo ""
 echo "💡 TIP: Run '/notifications.check' to verify the installation"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
