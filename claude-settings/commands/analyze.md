@@ -3,5 +3,5 @@ Check all Claude settings files and show their contents with active settings hig
 Run the settings analysis script:
 
 ```bash
-bash ~/.claude/plugins/claude-settings/scripts/check-settings.sh
+bash ~/.claude/plugins/marketplaces/cc-plugins/claude-settings/scripts/check-settings.sh
 ```

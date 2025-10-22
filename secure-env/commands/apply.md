@@ -16,5 +16,5 @@ This command runs a script that:
 After running this command, use `/local.check-env-permissions` to verify the configuration.
 
 ```bash
-~/.claude/scripts/apply-env-security.sh
+~/.claude/plugins/marketplaces/cc-plugins/secure-env/scripts/apply-env-security.sh
 ```
