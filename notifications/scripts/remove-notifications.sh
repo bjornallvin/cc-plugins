@@ -1,9 +1,12 @@
 #!/bin/bash
 
 # Remove notification hooks from project or user level
-# Usage: remove-notifications.sh [project|user]
+# Usage:
+#   remove-notifications.sh user
+#   remove-notifications.sh project [settings|local]
 
 REMOVE_LEVEL="$1"
+SETTINGS_TYPE="$2"
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -17,8 +20,28 @@ case "$REMOVE_LEVEL" in
     project)
         TARGET_CLAUDE="./.claude"
         TARGET_HOOKS="$TARGET_CLAUDE/hooks"
-        SETTINGS_FILE="$TARGET_CLAUDE/settings.json"
-        echo "Removing from project level: $TARGET_CLAUDE"
+
+        # Determine which settings file to use
+        case "$SETTINGS_TYPE" in
+            settings)
+                SETTINGS_FILE="$TARGET_CLAUDE/settings.json"
+                echo "Removing from project level: $TARGET_CLAUDE"
+                echo "Using: settings.json (committed to git)"
+                ;;
+            local)
+                SETTINGS_FILE="$TARGET_CLAUDE/settings.local.json"
+                echo "Removing from project level: $TARGET_CLAUDE"
+                echo "Using: settings.local.json (local only, not committed)"
+                ;;
+            *)
+                echo "❌ Invalid settings type for project level: '$SETTINGS_TYPE'"
+                echo ""
+                echo "Usage: $0 project [settings|local]"
+                echo "  settings - Use settings.json (committed to git)"
+                echo "  local    - Use settings.local.json (local only)"
+                exit 1
+                ;;
+        esac
         ;;
     user)
         TARGET_CLAUDE="$HOME/.claude"
@@ -29,7 +52,11 @@ case "$REMOVE_LEVEL" in
     *)
         echo "❌ Invalid removal level: '$REMOVE_LEVEL'"
         echo ""
-        echo "Usage: $0 [project|user]"
+        echo "Usage:"
+        echo "  $0 user"
+        echo "  $0 project [settings|local]"
+        echo ""
+        echo "Levels:"
         echo "  project - Remove hooks from project level (./.claude/)"
         echo "  user    - Remove hooks from user level (~/.claude/)"
         exit 1
@@ -64,9 +91,9 @@ fi
 
 echo ""
 
-# Update settings.json to remove hook configuration
+# Update settings file to remove hook configuration
 if [ -f "$SETTINGS_FILE" ]; then
-    echo "⚙️  Updating settings.json..."
+    echo "⚙️  Updating settings file..."
 
     # Create backup
     BACKUP_FILE="${SETTINGS_FILE}.backup-$(date +%Y%m%d-%H%M%S)"
@@ -75,18 +102,19 @@ if [ -f "$SETTINGS_FILE" ]; then
 
     # Check if jq is available
     if ! command -v jq &> /dev/null; then
-        echo "   ⚠️  jq not installed - cannot auto-update settings.json"
+        echo "   ⚠️  jq not installed - cannot auto-update settings file"
         echo "   Please manually remove these hooks from $SETTINGS_FILE:"
-        echo "     - Notification"
-        echo "     - Stop"
+        echo "     - hooks.Notification"
+        echo "     - hooks.Stop"
         echo ""
     else
-        # Use jq to remove hook entries
+        # Use jq to remove only notification hook entries
         TEMP_FILE=$(mktemp)
         jq 'del(.hooks.Notification) | del(.hooks.Stop)' \
             "$SETTINGS_FILE" > "$TEMP_FILE"
         mv "$TEMP_FILE" "$SETTINGS_FILE"
-        echo "   ✓ Removed hooks from settings.json"
+        echo "   ✓ Removed notification hooks from $SETTINGS_FILE"
+        echo "   ℹ️  All other settings preserved"
     fi
 else
     echo "ℹ️  No settings file found: $SETTINGS_FILE"
