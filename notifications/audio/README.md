@@ -5,8 +5,8 @@ This directory contains audio files for Claude Code notifications.
 ## Default Audio Files
 
 Place your audio files here with these names:
-- `waiting.mp3` - Plays when Claude is waiting for input
-- `completed.mp3` - Plays when Claude completes a task
+- `notification.mp3` - Plays when Claude is waiting for input
+- `done.mp3` - Plays when Claude completes a task
 
 ## Supported Formats
 

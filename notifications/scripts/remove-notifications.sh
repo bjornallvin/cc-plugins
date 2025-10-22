@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Remove notification hooks from the current project
+# Remove notification hooks from project or user level
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -9,11 +9,39 @@ echo "   Time: $(date '+%Y-%m-%d %H:%M:%S')"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
-PROJECT_HOOKS="./.claude/hooks"
-SETTINGS_FILE="./.claude/settings.json"
+# Ask user for removal level
+echo "Where would you like to remove notification hooks from?"
+echo ""
+echo "  1) Project level (./.claude/) - Only this project"
+echo "  2) User level (~/.claude/) - All projects"
+echo ""
+read -p "Enter choice [1 or 2]: " REMOVE_CHOICE
 
-WAITING_HOOK="$PROJECT_HOOKS/waiting-for-input.sh"
-COMPLETED_HOOK="$PROJECT_HOOKS/task-completed.sh"
+case $REMOVE_CHOICE in
+    1)
+        REMOVE_LEVEL="project"
+        TARGET_CLAUDE="./.claude"
+        TARGET_HOOKS="$TARGET_CLAUDE/hooks"
+        SETTINGS_FILE="$TARGET_CLAUDE/settings.json"
+        echo "   ✓ Removing from project level"
+        ;;
+    2)
+        REMOVE_LEVEL="user"
+        TARGET_CLAUDE="$HOME/.claude"
+        TARGET_HOOKS="$TARGET_CLAUDE/hooks"
+        SETTINGS_FILE="$TARGET_CLAUDE/settings.json"
+        echo "   ✓ Removing from user level"
+        ;;
+    *)
+        echo "❌ Invalid choice. Exiting."
+        exit 1
+        ;;
+esac
+
+echo ""
+
+WAITING_HOOK="$TARGET_HOOKS/waiting-for-input.sh"
+COMPLETED_HOOK="$TARGET_HOOKS/task-completed.sh"
 
 REMOVED_COUNT=0
 
@@ -70,9 +98,9 @@ echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 if [ $REMOVED_COUNT -eq 0 ]; then
-    echo "ℹ️  No notification hooks were installed"
+    echo "ℹ️  No notification hooks were installed at $REMOVE_LEVEL level"
 else
-    echo "✅ Notification hooks removed successfully!"
+    echo "✅ Notification hooks removed successfully from $REMOVE_LEVEL level!"
     echo ""
     echo "Removed $REMOVED_COUNT hook script(s)"
 fi

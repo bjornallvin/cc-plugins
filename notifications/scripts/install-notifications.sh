@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Install notification hooks to the current project
+# Install notification hooks at project or user level
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -13,23 +13,51 @@ echo ""
 PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$HOME/.claude/plugins/marketplaces/cc-plugins/notifications}"
 PLUGIN_HOOKS="$PLUGIN_ROOT/hooks"
 
-# Project locations
-PROJECT_CLAUDE="./.claude"
-PROJECT_HOOKS="$PROJECT_CLAUDE/hooks"
-SETTINGS_FILE="$PROJECT_CLAUDE/settings.json"
+# Ask user for installation level
+echo "Where would you like to install notification hooks?"
+echo ""
+echo "  1) Project level (./.claude/) - Only for this project"
+echo "  2) User level (~/.claude/) - All projects"
+echo ""
+read -p "Enter choice [1 or 2]: " INSTALL_CHOICE
+
+case $INSTALL_CHOICE in
+    1)
+        INSTALL_LEVEL="project"
+        TARGET_CLAUDE="./.claude"
+        TARGET_HOOKS="$TARGET_CLAUDE/hooks"
+        SETTINGS_FILE="$TARGET_CLAUDE/settings.json"
+        HOOK_PATH_PREFIX="./.claude/hooks"
+        echo "   ✓ Installing at project level"
+        ;;
+    2)
+        INSTALL_LEVEL="user"
+        TARGET_CLAUDE="$HOME/.claude"
+        TARGET_HOOKS="$TARGET_CLAUDE/hooks"
+        SETTINGS_FILE="$TARGET_CLAUDE/settings.json"
+        HOOK_PATH_PREFIX="$HOME/.claude/hooks"
+        echo "   ✓ Installing at user level"
+        ;;
+    *)
+        echo "❌ Invalid choice. Exiting."
+        exit 1
+        ;;
+esac
+
+echo ""
 
 # Create .claude directory if it doesn't exist
-if [ ! -d "$PROJECT_CLAUDE" ]; then
+if [ ! -d "$TARGET_CLAUDE" ]; then
     echo "📁 Creating .claude directory..."
-    mkdir -p "$PROJECT_CLAUDE"
-    echo "   ✓ Created: $PROJECT_CLAUDE"
+    mkdir -p "$TARGET_CLAUDE"
+    echo "   ✓ Created: $TARGET_CLAUDE"
 fi
 
 # Create hooks directory if it doesn't exist
-if [ ! -d "$PROJECT_HOOKS" ]; then
+if [ ! -d "$TARGET_HOOKS" ]; then
     echo "📁 Creating hooks directory..."
-    mkdir -p "$PROJECT_HOOKS"
-    echo "   ✓ Created: $PROJECT_HOOKS"
+    mkdir -p "$TARGET_HOOKS"
+    echo "   ✓ Created: $TARGET_HOOKS"
 fi
 
 echo ""
@@ -41,16 +69,16 @@ WAITING_HOOK="waiting-for-input.sh"
 COMPLETED_HOOK="task-completed.sh"
 
 if [ -f "$PLUGIN_HOOKS/$WAITING_HOOK" ]; then
-    cp "$PLUGIN_HOOKS/$WAITING_HOOK" "$PROJECT_HOOKS/"
-    chmod +x "$PROJECT_HOOKS/$WAITING_HOOK"
+    cp "$PLUGIN_HOOKS/$WAITING_HOOK" "$TARGET_HOOKS/"
+    chmod +x "$TARGET_HOOKS/$WAITING_HOOK"
     echo "   ✓ Copied: $WAITING_HOOK"
 else
     echo "   ⚠️  Source not found: $PLUGIN_HOOKS/$WAITING_HOOK"
 fi
 
 if [ -f "$PLUGIN_HOOKS/$COMPLETED_HOOK" ]; then
-    cp "$PLUGIN_HOOKS/$COMPLETED_HOOK" "$PROJECT_HOOKS/"
-    chmod +x "$PROJECT_HOOKS/$COMPLETED_HOOK"
+    cp "$PLUGIN_HOOKS/$COMPLETED_HOOK" "$TARGET_HOOKS/"
+    chmod +x "$TARGET_HOOKS/$COMPLETED_HOOK"
     echo "   ✓ Copied: $COMPLETED_HOOK"
 else
     echo "   ⚠️  Source not found: $PLUGIN_HOOKS/$COMPLETED_HOOK"
@@ -75,8 +103,8 @@ if ! command -v jq &> /dev/null; then
     echo ""
     echo '   {'
     echo '     "hooks": {'
-    echo '       "Notification": "bash ./.claude/hooks/waiting-for-input.sh",'
-    echo '       "Stop": "bash ./.claude/hooks/task-completed.sh"'
+    echo "       \"Notification\": \"bash $HOOK_PATH_PREFIX/waiting-for-input.sh\","
+    echo "       \"Stop\": \"bash $HOOK_PATH_PREFIX/task-completed.sh\""
     echo '     }'
     echo '   }'
     echo ""
@@ -84,16 +112,17 @@ else
     # Use jq to update settings
     if [ ! -f "$SETTINGS_FILE" ]; then
         # Create new settings file
-        echo '{}' | jq '.hooks = {
-          "Notification": "bash ./.claude/hooks/waiting-for-input.sh",
-          "Stop": "bash ./.claude/hooks/task-completed.sh"
+        echo '{}' | jq --arg prefix "$HOOK_PATH_PREFIX" '.hooks = {
+          "Notification": ("bash " + $prefix + "/waiting-for-input.sh"),
+          "Stop": ("bash " + $prefix + "/task-completed.sh")
         }' > "$SETTINGS_FILE"
         echo "   ✓ Created settings.json with hooks"
     else
         # Update existing settings file
         TEMP_FILE=$(mktemp)
-        jq '.hooks.Notification = "bash ./.claude/hooks/waiting-for-input.sh" |
-            .hooks.Stop = "bash ./.claude/hooks/task-completed.sh"' \
+        jq --arg prefix "$HOOK_PATH_PREFIX" \
+            '.hooks.Notification = ("bash " + $prefix + "/waiting-for-input.sh") |
+            .hooks.Stop = ("bash " + $prefix + "/task-completed.sh")' \
             "$SETTINGS_FILE" > "$TEMP_FILE"
         mv "$TEMP_FILE" "$SETTINGS_FILE"
         echo "   ✓ Updated settings.json with hooks"
@@ -102,11 +131,13 @@ fi
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "✅ Notification hooks installed successfully!"
+echo "✅ Notification hooks installed successfully at $INSTALL_LEVEL level!"
 echo ""
 echo "Installed hooks:"
-echo "  • Waiting for input: $PROJECT_HOOKS/$WAITING_HOOK"
-echo "  • Task completed: $PROJECT_HOOKS/$COMPLETED_HOOK"
+echo "  • Waiting for input: $TARGET_HOOKS/$WAITING_HOOK"
+echo "  • Task completed: $TARGET_HOOKS/$COMPLETED_HOOK"
+echo ""
+echo "Settings configured in: $SETTINGS_FILE"
 echo ""
 echo "💡 TIP: Run '/notifications.check' to verify the installation"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

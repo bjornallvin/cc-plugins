@@ -27,17 +27,22 @@ This plugin helps you stay informed about Claude's status without constantly wat
 
 ### `/notifications.check`
 
-Check the status of notification hooks in the current project.
+Check the status of notification hooks at both project and user levels.
 
 **What it shows:**
-- Whether hooks directory exists
-- Which notification hooks are installed
-- Settings.json hook configuration
+- Project level: `./.claude/` directory status
+- User level: `~/.claude/` directory status
+- Whether hooks are installed at each level
+- Settings.json hook configuration for both levels
 - Installation status and suggestions
 
 **Example output:**
 ```
 🔔 Claude Code Notification Hooks Status
+
+═══════════════════════════════════════════════════════════════════
+📂 PROJECT Level: ./.claude
+═══════════════════════════════════════════════════════════════════
 
 📁 Hooks directory: ./.claude/hooks
 
@@ -48,21 +53,34 @@ Check the status of notification hooks in the current project.
    File: ./.claude/hooks/task-completed.sh
 
 📝 Settings file: ./.claude/settings.json
-   Hooks configured in settings.json
+   Hooks configured:
    - Notification: bash ./.claude/hooks/waiting-for-input.sh
    - Stop: bash ./.claude/hooks/task-completed.sh
 
-✅ All notification hooks are installed
+Status: ✅ All hooks installed at PROJECT level
+
+═══════════════════════════════════════════════════════════════════
+📂 USER Level: /Users/username/.claude
+═══════════════════════════════════════════════════════════════════
+
+❌ No .claude directory found
+
+Status: ❌ No hooks installed at USER level
 ```
 
 ### `/notifications.install`
 
-Install notification hooks to the current project's `.claude/` directory.
+Install notification hooks at either project or user level.
+
+**Installation options:**
+- **Project level** (`./.claude/`) - Hooks only for this project
+- **User level** (`~/.claude/`) - Hooks for all projects
 
 **What it does:**
-- Creates `.claude/hooks/` directory if needed
-- Copies hook scripts from plugin to project
-- Updates `.claude/settings.json` with hook configuration
+- Prompts you to choose installation level
+- Creates hooks directory if needed
+- Copies hook scripts from plugin to chosen location
+- Updates settings.json with hook configuration
 - Creates backup of settings before modifying
 
 **Hook events:**
@@ -71,10 +89,15 @@ Install notification hooks to the current project's `.claude/` directory.
 
 ### `/notifications.remove`
 
-Remove notification hooks from the current project.
+Remove notification hooks from project or user level.
+
+**Removal options:**
+- **Project level** (`./.claude/`) - Remove from this project only
+- **User level** (`~/.claude/`) - Remove from all projects
 
 **What it does:**
-- Removes hook scripts from `.claude/hooks/`
+- Prompts you to choose removal level
+- Removes hook scripts from chosen location
 - Removes hook configuration from settings.json
 - Creates backup before modifying settings
 - Reports what was removed
@@ -85,8 +108,8 @@ By default, the hooks will show popup notifications. To add audio notifications:
 
 1. Create or download notification sound files (MP3 recommended)
 2. Place them in the plugin's `audio/` directory:
-   - `~/.claude/plugins/marketplaces/cc-plugins/notifications/audio/waiting.mp3`
-   - `~/.claude/plugins/marketplaces/cc-plugins/notifications/audio/completed.mp3`
+   - `~/.claude/plugins/marketplaces/cc-plugins/notifications/audio/notification.mp3`
+   - `~/.claude/plugins/marketplaces/cc-plugins/notifications/audio/done.mp3`
 
 See `audio/README.md` for more details and recommendations.
 
@@ -107,7 +130,7 @@ Triggered when Claude sends notifications or requests permissions (waiting for u
 
 - **Event**: `Notification`
 - **Notification**: "Claude is waiting for your input"
-- **Audio**: `audio/waiting.mp3` (if exists)
+- **Audio**: `audio/notification.mp3` (if exists)
 
 ### task-completed.sh
 
@@ -115,7 +138,7 @@ Runs when the main agent finishes responding (task completed).
 
 - **Event**: `Stop`
 - **Notification**: "Task completed"
-- **Audio**: `audio/completed.mp3` (if exists)
+- **Audio**: `audio/done.mp3` (if exists)
 
 ## Platform Support
 
