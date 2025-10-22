@@ -1,6 +1,9 @@
 #!/bin/bash
 
 # Install notification hooks at project or user level
+# Usage: install-notifications.sh [project|user]
+
+INSTALL_LEVEL="$1"
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -13,33 +16,28 @@ echo ""
 PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$HOME/.claude/plugins/marketplaces/cc-plugins/notifications}"
 PLUGIN_HOOKS="$PLUGIN_ROOT/hooks"
 
-# Ask user for installation level
-echo "Where would you like to install notification hooks?"
-echo ""
-echo "  1) Project level (./.claude/) - Only for this project"
-echo "  2) User level (~/.claude/) - All projects"
-echo ""
-read -p "Enter choice [1 or 2]: " INSTALL_CHOICE
-
-case $INSTALL_CHOICE in
-    1)
-        INSTALL_LEVEL="project"
+# Validate and set target based on argument
+case "$INSTALL_LEVEL" in
+    project)
         TARGET_CLAUDE="./.claude"
         TARGET_HOOKS="$TARGET_CLAUDE/hooks"
         SETTINGS_FILE="$TARGET_CLAUDE/settings.json"
         HOOK_PATH_PREFIX="./.claude/hooks"
-        echo "   ✓ Installing at project level"
+        echo "Installing at project level: $TARGET_CLAUDE"
         ;;
-    2)
-        INSTALL_LEVEL="user"
+    user)
         TARGET_CLAUDE="$HOME/.claude"
         TARGET_HOOKS="$TARGET_CLAUDE/hooks"
         SETTINGS_FILE="$TARGET_CLAUDE/settings.json"
         HOOK_PATH_PREFIX="$HOME/.claude/hooks"
-        echo "   ✓ Installing at user level"
+        echo "Installing at user level: $TARGET_CLAUDE"
         ;;
     *)
-        echo "❌ Invalid choice. Exiting."
+        echo "❌ Invalid installation level: '$INSTALL_LEVEL'"
+        echo ""
+        echo "Usage: $0 [project|user]"
+        echo "  project - Install hooks at project level (./.claude/)"
+        echo "  user    - Install hooks at user level (~/.claude/)"
         exit 1
         ;;
 esac

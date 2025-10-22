@@ -1,6 +1,9 @@
 #!/bin/bash
 
 # Remove notification hooks from project or user level
+# Usage: remove-notifications.sh [project|user]
+
+REMOVE_LEVEL="$1"
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -9,31 +12,26 @@ echo "   Time: $(date '+%Y-%m-%d %H:%M:%S')"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
-# Ask user for removal level
-echo "Where would you like to remove notification hooks from?"
-echo ""
-echo "  1) Project level (./.claude/) - Only this project"
-echo "  2) User level (~/.claude/) - All projects"
-echo ""
-read -p "Enter choice [1 or 2]: " REMOVE_CHOICE
-
-case $REMOVE_CHOICE in
-    1)
-        REMOVE_LEVEL="project"
+# Validate and set target based on argument
+case "$REMOVE_LEVEL" in
+    project)
         TARGET_CLAUDE="./.claude"
         TARGET_HOOKS="$TARGET_CLAUDE/hooks"
         SETTINGS_FILE="$TARGET_CLAUDE/settings.json"
-        echo "   ✓ Removing from project level"
+        echo "Removing from project level: $TARGET_CLAUDE"
         ;;
-    2)
-        REMOVE_LEVEL="user"
+    user)
         TARGET_CLAUDE="$HOME/.claude"
         TARGET_HOOKS="$TARGET_CLAUDE/hooks"
         SETTINGS_FILE="$TARGET_CLAUDE/settings.json"
-        echo "   ✓ Removing from user level"
+        echo "Removing from user level: $TARGET_CLAUDE"
         ;;
     *)
-        echo "❌ Invalid choice. Exiting."
+        echo "❌ Invalid removal level: '$REMOVE_LEVEL'"
+        echo ""
+        echo "Usage: $0 [project|user]"
+        echo "  project - Remove hooks from project level (./.claude/)"
+        echo "  user    - Remove hooks from user level (~/.claude/)"
         exit 1
         ;;
 esac
