@@ -4,7 +4,7 @@ A collection of plugins and utilities for [Claude Code](https://claude.com/claud
 
 ## Plugins
 
-### merge-settings
+### claude-settings
 
 A plugin for managing and merging Claude Code settings across user, project, and local configuration files.
 
@@ -14,7 +14,7 @@ A plugin for managing and merging Claude Code settings across user, project, and
 - Handle conflicts gracefully with clear reporting
 - Create automatic backups before making changes
 
-[Read more →](./merge-settings/README.md)
+[Read more →](./claude-settings/README.md)
 
 ### secure-env
 

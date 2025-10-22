@@ -118,7 +118,7 @@ if [ ${#OVERRIDDEN[@]} -gt 0 ]; then
         echo "   - $override"
     done
     echo ""
-    echo "💡 TIP: Run 'merge-settings.merge' to merge overridden settings into the active file."
+    echo "💡 TIP: Run 'claude-settings.merge' to merge overridden settings into the active file."
 else
     echo "✅ No settings files are being overridden."
 fi

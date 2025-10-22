@@ -1,4 +1,4 @@
-# merge-settings
+# claude-settings
 
 A Claude Code plugin for managing and merging settings across user, project, and local configuration files.
 
@@ -20,16 +20,16 @@ Claude Code has a settings precedence system where higher-level settings complet
 
 ## Installation
 
-Copy the `merge-settings` directory to your Claude Code plugins location:
+Copy the `claude-settings` directory to your Claude Code plugins location:
 
 ```bash
 /plugin marketplace add bjornallvin/cc-plugins
-/plugin install merge-settings@cc-plugins
+/plugin install claude-settings@cc-plugins
 ```
 
 ## Commands
 
-### `/merge-settings.check`
+### `/claude-settings.analyze`
 
 Check all Claude settings files and show their contents with clear indication of which file is active.
 
@@ -55,10 +55,10 @@ Check all Claude settings files and show their contents with clear indication of
 ⚡ User settings are ACTIVE
    File: ~/.claude/settings.json
 
-💡 TIP: Run '/merge-settings.merge' to merge settings from overridden files.
+💡 TIP: Run '/claude-settings.merge' to merge settings from overridden files.
 ```
 
-### `/merge-settings.merge`
+### `/claude-settings.merge`
 
 Merge settings from overridden (lower-precedence) files into the active settings file.
 
@@ -98,7 +98,7 @@ Apply merge? [Waiting for confirmation...]
    - Added 1 hook
    - Resolved 1 conflict (kept active file's value)
 
-💡 Run '/merge-settings.check' to verify the merged settings.
+💡 Run '/claude-settings.analyze' to verify the merged settings.
 ```
 
 ## Use Cases
@@ -108,23 +108,23 @@ Apply merge? [Waiting for confirmation...]
 You have secure deny rules in `~/.claude/settings.json`, but a project has `./.claude/settings.json` that doesn't include those protections.
 
 **Solution:**
-1. Run `/merge-settings.check` to see what's being overridden
-2. Run `/merge-settings.merge` to copy your user-level protections into the project settings
+1. Run `/claude-settings.analyze` to see what's being overridden
+2. Run `/claude-settings.merge` to copy your user-level protections into the project settings
 
 ### Scenario 2: Local override without losing project config
 
 You created `./.claude/settings.local.json` for temporary local testing, but you want to preserve the project settings from `./.claude/settings.json`.
 
 **Solution:**
-1. Run `/merge-settings.check` to see both files
-2. Run `/merge-settings.merge` to merge project settings into your local file
+1. Run `/claude-settings.analyze` to see both files
+2. Run `/claude-settings.merge` to merge project settings into your local file
 
 ### Scenario 3: Understanding which settings are active
 
 You're not sure which configuration file is controlling Claude's behavior.
 
 **Solution:**
-Run `/merge-settings.check` to see all files and which one is active
+Run `/claude-settings.analyze` to see all files and which one is active
 
 ## How Settings Precedence Works
 
@@ -142,20 +142,20 @@ This means:
 ## Best Practices
 
 1. **Before starting work on a new project:**
-   - Run `/merge-settings.check` to see if project settings exist
-   - Run `/merge-settings.merge` if you want to preserve your user-level settings
+   - Run `/claude-settings.analyze` to see if project settings exist
+   - Run `/claude-settings.merge` if you want to preserve your user-level settings
 
 2. **When creating project settings:**
-   - Start by running `/merge-settings.check` to see your user settings
-   - Create project settings, then run `/merge-settings.merge` to include user defaults
+   - Start by running `/claude-settings.analyze` to see your user settings
+   - Create project settings, then run `/claude-settings.merge` to include user defaults
 
 3. **When collaborating:**
    - Share `./.claude/settings.json` with your team (commit to git)
    - Keep `./.claude/settings.local.json` in `.gitignore` for personal overrides
-   - Use `/merge-settings.merge` to sync team settings into your local overrides
+   - Use `/claude-settings.merge` to sync team settings into your local overrides
 
 4. **Regular maintenance:**
-   - Periodically run `/merge-settings.check` to ensure expected settings are active
+   - Periodically run `/claude-settings.analyze` to ensure expected settings are active
    - Check for overridden settings that you might want to merge
 
 ## Safety Features

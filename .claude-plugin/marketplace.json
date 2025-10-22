@@ -7,8 +7,8 @@
         },
   "plugins": [
     {
-      "name": "merge-settings",
-      "source": "./merge-settings",
+      "name": "claude-settings",
+      "source": "./claude-settings",
       "description": "Plugin for managing and merging Claude settings files across user, project, and local scopes with merge capabilities"
     },
     {
