@@ -6,8 +6,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-This is a collection of Claude Code plugins distributed via marketplace. The repository contains two plugins:
+This is a collection of Claude Code plugins distributed via marketplace. The repository contains three plugins:
 - `claude-settings`: Manages Claude settings across user/project/local scopes with merge capabilities
+- `notifications`: Provides audio and popup notifications for Claude events
 - `secure-env`: Protects .env files from accidental access by Claude Code
 
 ## Architecture
@@ -85,6 +86,19 @@ Allows users to:
 - Merge overridden settings upward into active file with `/claude-settings.merge`
 - Handle conflicts (active file wins)
 - Create backups before modifications
+
+### notifications
+
+Provides audio and popup notifications for Claude events:
+- `/notifications.check` - Check status of notification hooks
+- `/notifications.install` - Install hooks to project `.claude/` directory
+- `/notifications.remove` - Remove notification hooks from project
+
+Uses Claude Code hooks system to trigger notifications:
+- `Notification` hook: Triggered when Claude sends notifications or requests permissions (waiting for input)
+- `Stop` hook: Runs when main agent finishes responding (task completed)
+
+Audio files remain in plugin directory and are referenced by hooks. Supports macOS (afplay/osascript) and Linux (notify-send).
 
 ### secure-env
 

@@ -1,0 +1,13 @@
+{
+  "name": "notifications",
+  "version": "1.0.0",
+  "description": "Plugin for managing audio and popup notifications when Claude is waiting for input or completes tasks",
+  "author": {
+    "name": "Björn Allvin"
+  },
+  "commands": [
+    "./commands/check.md",
+    "./commands/install.md",
+    "./commands/remove.md"
+  ]
+}

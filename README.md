@@ -16,6 +16,18 @@ A plugin for managing and merging Claude Code settings across user, project, and
 
 [Read more →](./claude-settings/README.md)
 
+### notifications
+
+A plugin for managing audio and popup notifications when Claude is waiting for input or completes tasks.
+
+**Key Features:**
+- Audio notifications for different events
+- System popup notifications on macOS and Linux
+- Easy management with check, install, and remove commands
+- Customizable audio files
+
+[Read more →](./notifications/README.md)
+
 ### secure-env
 
 A security plugin that helps protect sensitive .env files from accidental access by Claude Code while still allowing access to .env.example files.

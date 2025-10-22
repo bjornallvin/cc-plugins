@@ -15,6 +15,11 @@
       "name": "secure-env",
       "source": "./secure-env",
       "description": "Security plugin that helps protect sensitive .env files from accidental access by Claude Code while still allowing access to .env.example files"
+    },
+    {
+      "name": "notifications",
+      "source": "./notifications",
+      "description": "Plugin for managing audio and popup notifications when Claude is waiting for input or completes tasks"
     }
   ]
 }
