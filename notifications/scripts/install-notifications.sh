@@ -126,7 +126,7 @@ else
               "hooks": [
                 {
                   "type": "command",
-                  "command": ("bash " + $waiting)
+                  "command":  $waiting
                 }
               ]
             }
@@ -137,7 +137,7 @@ else
               "hooks": [
                 {
                   "type": "command",
-                  "command": ("bash " + $completed)
+                  "command": $completed
                 }
               ]
             }
