@@ -75,9 +75,13 @@ if [ ! -d "$TARGET_CLAUDE" ]; then
     echo ""
 fi
 
-# Verify plugin hooks exist
+# Verify plugin hooks exist (absolute paths for verification)
 WAITING_HOOK="$PLUGIN_HOOKS/waiting-for-input.sh"
 COMPLETED_HOOK="$PLUGIN_HOOKS/task-completed.sh"
+
+# Create relative paths using ~ for settings file (portable across machines)
+WAITING_HOOK_RELATIVE="${WAITING_HOOK/#$HOME/~}"
+COMPLETED_HOOK_RELATIVE="${COMPLETED_HOOK/#$HOME/~}"
 
 if [ ! -f "$WAITING_HOOK" ] || [ ! -f "$COMPLETED_HOOK" ]; then
     echo "❌ Plugin hooks not found in: $PLUGIN_HOOKS"
@@ -109,8 +113,8 @@ if ! command -v jq &> /dev/null; then
     echo "   Please manually add these hooks to $SETTINGS_FILE:"
     echo ""
     echo '   "hooks": {'
-    echo "     \"Notification\": \"bash $WAITING_HOOK\","
-    echo "     \"Stop\": \"bash $COMPLETED_HOOK\""
+    echo "     \"Notification\": \"bash $WAITING_HOOK_RELATIVE\","
+    echo "     \"Stop\": \"bash $COMPLETED_HOOK_RELATIVE\""
     echo '   }'
     echo ""
 else
@@ -119,7 +123,7 @@ else
 
     if [ ! -f "$SETTINGS_FILE" ] && [ ! -L "$SETTINGS_FILE" ]; then
         # Create new settings file with just hooks
-        echo '{}' | jq --arg waiting "$WAITING_HOOK" --arg completed "$COMPLETED_HOOK" '.hooks = {
+        echo '{}' | jq --arg waiting "$WAITING_HOOK_RELATIVE" --arg completed "$COMPLETED_HOOK_RELATIVE" '.hooks = {
           "Notification": [
             {
               "matcher": "",
@@ -152,7 +156,7 @@ else
 
         # Update existing settings file - merge hooks property
         # Using cat instead of mv to preserve symlinks
-        jq --arg waiting "$WAITING_HOOK" --arg completed "$COMPLETED_HOOK" '
+        jq --arg waiting "$WAITING_HOOK_RELATIVE" --arg completed "$COMPLETED_HOOK_RELATIVE" '
           .hooks.Notification = [
             {
               "matcher": "",
@@ -189,8 +193,8 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo "✅ Notification hooks installed successfully at $INSTALL_LEVEL level!"
 echo ""
 echo "Hooks configured in: $SETTINGS_FILE"
-echo "  • Notification → $WAITING_HOOK"
-echo "  • Stop → $COMPLETED_HOOK"
+echo "  • Notification → $WAITING_HOOK_RELATIVE"
+echo "  • Stop → $COMPLETED_HOOK_RELATIVE"
 echo ""
 echo "💡 TIP: Run '/notifications.check' to verify the installation"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
