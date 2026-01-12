@@ -1,6 +1,6 @@
 {
   "name": "secure-env",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Security plugin that helps protect sensitive .env files from accidental access by Claude Code",
   "author": {
     "name": "Björn Allvin"

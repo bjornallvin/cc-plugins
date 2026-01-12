@@ -1,6 +1,6 @@
 {
   "name": "notifications",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Plugin for managing audio and popup notifications when Claude is waiting for input or completes tasks",
   "author": {
     "name": "Björn Allvin"

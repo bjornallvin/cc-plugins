@@ -1,6 +1,6 @@
 {
   "name": "claude-settings",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Plugin for managing Claude settings files across user, project, and local scopes with merge capabilities",
   "author": {
     "name": "Björn Allvin"
